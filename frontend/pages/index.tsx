@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { io } from "socket.io-client";
@@ -7,6 +7,7 @@ import { io } from "socket.io-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
+import { SocketContext } from "../contexts/SocketContext";
 
 const Home: NextPage = () => {
   const [choice, setChoice] = useState("");
@@ -14,23 +15,24 @@ const Home: NextPage = () => {
   const [isConnectedToRoom, setIsConnectedToRoom] = useState<boolean>(false);
   const [roomCode, setRoomCode] = useState<string>("");
   const [socket, setSocket] = useState<any>(null);
+  const [username, setUsername] = useState<string>("");
   const router = useRouter();
+  const socketContext = useContext(SocketContext);
 
   useEffect(() => {
     let newSocket = io("ws://localhost:5000");
 
-    setSocket(newSocket);
-
-    newSocket.on("connect", () => {
+    if (socketContext.socket == null) {
+      socketContext.setSocket(newSocket);
       setIsConnected(true);
-    });
+    } else {
+      setIsConnected(true);
+    }
 
-    // newSocket.emit("join-room", roomCode);
-  }, []);
-
-  // const JoinARoom = () => {};
-
-  // const CreateARoom = () => {};
+    // newSocket.on("connect", () => {
+    //   setIsConnected(true);
+    // });
+  }, [socketContext]);
 
   return (
     <div className="bg-white min-h-screen flex flex-col justify-center align-middle gap-8">
@@ -47,33 +49,22 @@ const Home: NextPage = () => {
       </Head>
       <div className="text-black text-6xl text-center">msg-it</div>
       {isConnected ? (
-        <div className="flex flex-col justify-center gap-4 items-center">
-          <div className="flex gap-4">
-            <button className="bg-button-bg text-white text-lg p-2 px-4 rounded-full">
-              Create a Room
-            </button>
-
-            <button
-              className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
-              onClick={() => setChoice("Join")}
-            >
-              Join a Room
-            </button>
-          </div>
-
-          <div
-            className={`${
-              choice === "Join" ? "block" : "hidden"
-            } flex justify-center w-full gap-4 items-center`}
-          >
+        <div className="flex flex-col justify-center items-center">
+          Socket Context id is{" "}
+          {socketContext ? socketContext?.socket.id : "Loading..."}
+          <div className="mb-4 font-semibold">What should we call you?</div>
+          <div className="flex gap-2">
             <input
               className="p-2 text-center border-2 rounded-full border-button-bg"
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             ></input>
             <button
               className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
-              onClick={() => router.push(`/room/${roomCode}`)}
+              onClick={(e) => {
+                socketContext.setUsername(username);
+                router.push("/room/testRoom");
+              }}
             >
               Go!
             </button>
