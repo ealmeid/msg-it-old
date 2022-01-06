@@ -1,9 +1,37 @@
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
+import { io } from "socket.io-client";
+// import Image from "next/image";
+// import styles from "../styles/Home.module.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+  const [choice, setChoice] = useState("");
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isConnectedToRoom, setIsConnectedToRoom] = useState<boolean>(false);
+  const [roomCode, setRoomCode] = useState<string>("");
+  const [socket, setSocket] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    let newSocket = io("ws://localhost:5000");
+
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      setIsConnected(true);
+    });
+
+    // newSocket.emit("join-room", roomCode);
+  }, []);
+
+  // const JoinARoom = () => {};
+
+  // const CreateARoom = () => {};
+
   return (
     <div className="bg-white min-h-screen flex flex-col justify-center align-middle gap-8">
       <Head>
@@ -18,15 +46,46 @@ const Home: NextPage = () => {
         ></link>
       </Head>
       <div className="text-black text-6xl text-center">msg-it</div>
-      <div className="flex justify-center gap-4">
-        <button className="bg-button-bg text-white text-lg p-2 px-4 rounded-full">
-          Create a Room
-        </button>
+      {isConnected ? (
+        <div className="flex flex-col justify-center gap-4 items-center">
+          <div className="flex gap-4">
+            <button className="bg-button-bg text-white text-lg p-2 px-4 rounded-full">
+              Create a Room
+            </button>
 
-        <button className="bg-button-bg text-white text-lg p-2 px-4 rounded-full">
-          Join a Room
-        </button>
-      </div>
+            <button
+              className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
+              onClick={() => setChoice("Join")}
+            >
+              Join a Room
+            </button>
+          </div>
+
+          <div
+            className={`${
+              choice === "Join" ? "block" : "hidden"
+            } flex justify-center w-full gap-4 items-center`}
+          >
+            <input
+              className="p-2 text-center border-2 rounded-full border-button-bg"
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value)}
+            ></input>
+            <button
+              className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
+              onClick={() => router.push(`/room/${roomCode}`)}
+            >
+              Go!
+            </button>
+          </div>
+        </div>
+      ) : (
+        <FontAwesomeIcon
+          icon={faSpinner}
+          className="animate-spin w-8 self-center fill-blue-400"
+          color="#6277f2"
+        />
+      )}
     </div>
   );
 };

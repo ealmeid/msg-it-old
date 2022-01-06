@@ -10,11 +10,19 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket: any) => {
-  console.log("server side - connected");
+  socket.join("testRoom");
+
+  socket.to("testRoom").emit(`joined`, socket.id);
 
   socket.on("message", (data: any) => {
-    socket.send(data);
+    io.in("testRoom").emit("message", data);
   });
+
+  // socket.on("set-username", (name: any) => {
+  //   socket.username = name;
+  // });
+
+  // console.log(io.of("/").adapter.rooms.get("testRoom").size);
 });
 
 httpServer.listen(5000);
