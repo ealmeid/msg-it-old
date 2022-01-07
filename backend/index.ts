@@ -17,11 +17,14 @@ const io = new Server(httpServer, {
 
 io.on("connection", (socket: any) => {
   socket.on("message", (data: any) => {
-    io.in("testRoom").emit("message", data);
+    io.in("testRoom").emit("message", {
+      socketId: socket.id,
+      data: data,
+    });
   });
 
   socket.on("set_name", (name: string) => {
-    socket.username = name;
+    socket.data["username"] = name;
   });
 
   socket.on("join_room", (roomId: string) => {
@@ -30,13 +33,21 @@ io.on("connection", (socket: any) => {
   });
 });
 
-app.get(`/users/:roomId`, (req: any, res: any) => {
+app.get(`/users/:roomId`, async (req: any, res: any) => {
   let params = req.params;
   let roomId = params.roomId;
-  let users = io.of("/").adapter.rooms.get(roomId);
+  let socketIds = Array.from(io.of("/").adapter.rooms.get(roomId).values());
+  let sockets = await io.fetchSockets();
+
+  let socketIdsAndUsernames = socketIds.map((id) => {
+    let socket = sockets.find((x) => x.id === id);
+    let res = { socketId: id, username: socket.data.username };
+    return res;
+  });
+  // console.log(sockets);
   // console.log(io.of("/").adapter.rooms);
   // console.log(users.values());
-  res.send(Array.from(users.values()));
+  res.send(socketIdsAndUsernames);
 });
 
 httpServer.listen(5000);

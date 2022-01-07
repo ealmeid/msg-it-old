@@ -4,14 +4,24 @@ import { io } from "socket.io-client";
 import { SocketContext } from "../../../contexts/SocketContext";
 import axios from "axios";
 
+interface User {
+  socketId: string;
+  username: string;
+}
+
+interface Message {
+  data: string;
+  socketId: string;
+}
+
 const Room = () => {
   const router = useRouter();
   const roomId = router.query.roomId as string;
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<any>(null);
-  const [usersConnected, setUsersConnected] = useState<object[]>([]);
+  const [usersConnected, setUsersConnected] = useState<User[]>([]);
   const socketContext = useContext(SocketContext);
 
   const getConnectedUsers = async () => {
@@ -35,18 +45,18 @@ const Room = () => {
 
   if (socketContext.socket != null) {
     socketContext.socket.on("message", (data: any) => {
+      console.log(data);
       let newMessages = [...messages];
       newMessages.push(data);
       setMessages(newMessages);
+      console.log(newMessages);
     });
 
     socketContext.socket.on("connect", () => {
       setIsConnected(true);
-      console.log("connected");
     });
 
     socketContext.socket.on("joined_room", (arg: any) => {
-      console.log("new-join-room");
       getConnectedUsers();
     });
   }
@@ -65,15 +75,21 @@ const Room = () => {
                 return (
                   <div>
                     <div className="flex justify-between">
-                      <div className="text-gray-500">Test Name</div>
+                      <div className="text-gray-500">
+                        {usersConnected
+                          ? usersConnected?.find(
+                              (x) => x.socketId === message.socketId
+                            )?.username
+                          : "N/A"}
+                      </div>
                       <div className="text-gray-500">Thurs 23 2021</div>
                     </div>
 
                     <div
                       className="mb-4 bg-button-bg text-white pl-2 py-1 rounded-full"
-                      key={message}
+                      key={message.data}
                     >
-                      {message}
+                      {message.data}
                     </div>
                   </div>
                 );
@@ -100,8 +116,8 @@ const Room = () => {
       <div className="flex flex-col items-center justify-center">
         <div className="underline">Users Connected</div>
         <div>
-          {Object.values(usersConnected).map((user) => {
-            return <div>{user}</div>;
+          {usersConnected.map((user) => {
+            return <div>{user.username}</div>;
           })}
         </div>
       </div>

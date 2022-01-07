@@ -19,8 +19,6 @@ const SocketProvider = (props: any) => {
 
   const setUsername = (name: string) => {
     socket.emit("set_name", name);
-    setSocket(socket);
-    console.log(socket);
   };
 
   const value: any = {
