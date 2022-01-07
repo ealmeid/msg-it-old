@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-interface ISocketContext {
+export interface ISocketContext {
   socket: any;
   setSocket: (socket: any) => void;
   joinRoom: (roomId: string) => void;

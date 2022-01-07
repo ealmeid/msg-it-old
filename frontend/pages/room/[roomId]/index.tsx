@@ -1,8 +1,10 @@
 import { useRouter } from "next/router";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, ContextType } from "react";
 import { io } from "socket.io-client";
-import { SocketContext } from "../../../contexts/SocketContext";
+import { ISocketContext, SocketContext } from "../../../contexts/SocketContext";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 interface User {
   socketId: string;
@@ -14,13 +16,64 @@ interface Message {
   socketId: string;
 }
 
+interface UserConnectedListProps {
+  users: User[];
+}
+
+interface MessageProps {
+  message: any;
+  socketContext: ISocketContext;
+  usersConnected: User[];
+}
+
+const Message: React.FC<MessageProps> = ({
+  message,
+  socketContext,
+  usersConnected,
+}) => {
+  return (
+    <div
+      className={`${
+        message.socketId === socketContext.socket.id ? "self-end" : "self-start"
+      } w-auto`}
+    >
+      <div className="flex justify-between gap-2">
+        <div className="text-black font-semibold">
+          {usersConnected
+            ? usersConnected?.find((x) => x.socketId === message.socketId)
+                ?.username
+            : "N/A"}
+        </div>
+        <div className="text-gray-500">Thurs 23 2021</div>
+      </div>
+
+      <div
+        className="mb-4 bg-button-bg text-white px-2 py-1 rounded-2xl max-w-sm w-48 break-all"
+        key={message.data}
+      >
+        {message.data}
+      </div>
+    </div>
+  );
+};
+
+const UsersConnectedList: React.FC<UserConnectedListProps> = ({ users }) => (
+  <div className="flex flex-col items-center justify-center bg-gray-100 h-full p-4 rounded-r-md">
+    <div className="font-semibold">Users Connected</div>
+    <div>
+      {users.map((user) => {
+        return <div>{user.username}</div>;
+      })}
+    </div>
+  </div>
+);
+
 const Room = () => {
   const router = useRouter();
   const roomId = router.query.roomId as string;
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [socket, setSocket] = useState<any>(null);
   const [usersConnected, setUsersConnected] = useState<User[]>([]);
   const socketContext = useContext(SocketContext);
 
@@ -57,64 +110,43 @@ const Room = () => {
   }, [socketContext]);
 
   return (
-    <div className="flex items-center justify-center gap-4">
-      <div className="min-h-screen flex flex-col justify-center items-center">
-        <div className="mb-4">
-          Socket context id is{" "}
-          {socketContext ? socketContext?.socket?.id : "Loading..."}
-        </div>
-        <div className=" bg-gray-400 rounded-md p-12 flex flex-col">
-          <div>
-            <div className="text-black-400">
-              {messages.map((message) => {
-                return (
-                  <div>
-                    <div className="flex justify-between">
-                      <div className="text-gray-500">
-                        {usersConnected
-                          ? usersConnected?.find(
-                              (x) => x.socketId === message.socketId
-                            )?.username
-                          : "N/A"}
-                      </div>
-                      <div className="text-gray-500">Thurs 23 2021</div>
-                    </div>
-
-                    <div
-                      className="mb-4 bg-button-bg text-white pl-2 py-1 rounded-full"
-                      key={message.data}
-                    >
-                      {message.data}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+    <div className="flex items-center justify-center gap-4 min-h-screen max-h-screen bg-button-bg">
+      <div className="flex justify-center items-center h-1/2-screen max-w-1/2-screen w-full">
+        <div className="flex-1 h-full bg-white rounded-l-md flex flex-col border-r-2">
+          <div className="p-4">
+            <div className="font-bold text-lg">Test Room</div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col flex-1 p-12 pb-6 overflow-y-scroll">
+            {messages.map((message) => {
+              return (
+                <Message
+                  message={message}
+                  socketContext={socketContext}
+                  usersConnected={usersConnected}
+                />
+              );
+            })}
+          </div>
+          <div className="flex gap-2 items-center pb-6 px-6">
             <input
-              className="w-full h-8 rounded-full pl-2"
+              className="w-full h-8 rounded-full px-4 py-6 border-2"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              placeholder="Enter a message"
             />
-            <button
+            <FontAwesomeIcon
+              icon={faPaperPlane}
+              className="cursor-pointer w-8"
+              color="#6277f2"
               onClick={() => {
                 socketContext.socket.send(message);
                 setMessage("");
               }}
-            >
-              Enter
-            </button>
+            />
           </div>
         </div>
-      </div>
-      <div className="flex flex-col items-center justify-center">
-        <div className="underline">Users Connected</div>
-        <div>
-          {usersConnected.map((user) => {
-            return <div>{user.username}</div>;
-          })}
-        </div>
+
+        <UsersConnectedList users={usersConnected} />
       </div>
     </div>
   );

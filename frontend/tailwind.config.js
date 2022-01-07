@@ -8,6 +8,13 @@ module.exports = {
       colors: {
         "button-bg": "#6277f2",
       },
+      maxWidth: {
+        "1/2": "50%",
+        "1/2-screen": "50vw",
+      },
+      height: {
+        "1/2-screen": "50vh",
+      },
     },
   },
   plugins: [],
