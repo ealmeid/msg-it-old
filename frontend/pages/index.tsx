@@ -7,31 +7,23 @@ import { io } from "socket.io-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
-import { SocketContext } from "../contexts/SocketContext";
+import { SocketContext, ISocketContext } from "../contexts/SocketContext";
 
 const Home: NextPage = () => {
-  const [choice, setChoice] = useState("");
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [isConnectedToRoom, setIsConnectedToRoom] = useState<boolean>(false);
-  const [roomCode, setRoomCode] = useState<string>("");
-  const [socket, setSocket] = useState<any>(null);
   const [username, setUsername] = useState<string>("");
   const router = useRouter();
-  const socketContext = useContext(SocketContext);
+  const socketContext = useContext(SocketContext) as ISocketContext;
 
   useEffect(() => {
     let newSocket = io("ws://localhost:5000");
 
     if (socketContext.socket == null) {
       socketContext.setSocket(newSocket);
-      setIsConnected(true);
-    } else {
-      setIsConnected(true);
+      newSocket.on("connect", () => {
+        setIsConnected(true);
+      });
     }
-
-    // newSocket.on("connect", () => {
-    //   setIsConnected(true);
-    // });
   }, [socketContext]);
 
   return (
@@ -51,7 +43,7 @@ const Home: NextPage = () => {
       {isConnected ? (
         <div className="flex flex-col justify-center items-center">
           Socket Context id is{" "}
-          {socketContext ? socketContext?.socket.id : "Loading..."}
+          {socketContext?.socket?.id ? socketContext?.socket.id : "Loading..."}
           <div className="mb-4 font-semibold">What should we call you?</div>
           <div className="flex gap-2">
             <input
