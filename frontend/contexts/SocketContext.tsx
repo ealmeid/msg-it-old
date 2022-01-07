@@ -8,7 +8,7 @@ export interface ISocketContext {
   setUsername: (username: string) => void;
 }
 
-const SocketContext = createContext<ISocketContext>(undefined);
+const SocketContext = createContext<ISocketContext | undefined>(undefined);
 
 const SocketProvider = (props: any) => {
   const [socket, setSocket] = useState<any>(null);

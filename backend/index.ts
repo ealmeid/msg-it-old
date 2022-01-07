@@ -28,15 +28,21 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("join_room", (roomId: string) => {
-    io.in(roomId).emit("joined_room");
     socket.join(roomId);
+    io.in(roomId).emit("joined_room");
+  });
+
+  socket.on("leave_room", (roomId: string) => {
+    socket.leave(roomId);
+    io.in(roomId).emit("leave_room");
   });
 });
 
 app.get(`/users/:roomId`, async (req: any, res: any) => {
   let params = req.params;
   let roomId = params.roomId;
-  let socketIds = Array.from(io.of("/").adapter.rooms.get(roomId).values());
+  let socketSet = io.of("/").adapter.rooms.get(roomId);
+  let socketIds = Array.from(socketSet.values());
   let sockets = await io.fetchSockets();
 
   let socketIdsAndUsernames = socketIds.map((id) => {

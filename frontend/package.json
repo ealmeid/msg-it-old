@@ -15,11 +15,13 @@
     "next": "12.0.7",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "socket.io-client": "^4.4.0"
+    "socket.io-client": "^4.4.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "17.0.5",
     "@types/react": "17.0.38",
+    "@types/uuid": "^8.3.4",
     "autoprefixer": "^10.4.1",
     "eslint": "8.5.0",
     "eslint-config-next": "12.0.7",
