@@ -37,29 +37,24 @@ const Room = () => {
   }, [roomId]);
 
   useEffect(() => {
+    let newMessages = [...messages];
     if (socketContext.socket != null) {
-      console.log("joining room", roomId);
       socketContext.joinRoom(roomId);
+
+      socketContext.socket.on("message", (data: any) => {
+        newMessages.push(data);
+        setMessages(newMessages);
+      });
+
+      socketContext.socket.on("connect", () => {
+        setIsConnected(true);
+      });
+
+      socketContext.socket.on("joined_room", (arg: any) => {
+        getConnectedUsers();
+      });
     }
   }, [socketContext]);
-
-  if (socketContext.socket != null) {
-    socketContext.socket.on("message", (data: any) => {
-      console.log(data);
-      let newMessages = [...messages];
-      newMessages.push(data);
-      setMessages(newMessages);
-      console.log(newMessages);
-    });
-
-    socketContext.socket.on("connect", () => {
-      setIsConnected(true);
-    });
-
-    socketContext.socket.on("joined_room", (arg: any) => {
-      getConnectedUsers();
-    });
-  }
 
   return (
     <div className="flex items-center justify-center gap-4">
