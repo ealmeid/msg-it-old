@@ -5,7 +5,7 @@ import { SocketProvider } from "../contexts/SocketContext";
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SocketProvider>
-      <Component {...pageProps} />;
+      <Component {...pageProps} />
     </SocketProvider>
   );
 }
