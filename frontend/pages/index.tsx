@@ -5,11 +5,16 @@ import { io } from "socket.io-client";
 // import Image from "next/image";
 // import styles from "../styles/Home.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowRight,
+  faPlus,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
 import { SocketContext, ISocketContext } from "../contexts/SocketContext";
 
 const Home: NextPage = () => {
+  const [choice, setChoice] = useState<string>("");
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [username, setUsername] = useState<string>("");
   const router = useRouter();
@@ -39,28 +44,71 @@ const Home: NextPage = () => {
           rel="stylesheet"
         ></link>
       </Head>
-      <div className="text-black text-6xl text-center">msg-it</div>
+      <div>
+        <img src="/assets/connected.svg" className="w-32 mx-auto" />
+      </div>
+      <div className="font-semibold text-6xl text-center">msg-it</div>
+      <div className="text-gray-400 text-lg text-center">
+        Join. Chat. Leave.
+      </div>
       {isConnected ? (
-        <div className="flex flex-col justify-center items-center">
-          Socket Context id is{" "}
-          {socketContext?.socket?.id ? socketContext?.socket.id : "Loading..."}
-          <div className="mb-4 font-semibold">What should we call you?</div>
+        <div className="flex flex-col justify-center items-center gap-4">
+          {/* Socket Context id is{" "}
+          {socketContext?.socket?.id ? socketContext?.socket.id : "Loading..."} */}
+          {/* <div className="mb-4 font-semibold">What should we call you?</div> */}
           <div className="flex gap-2">
             <input
-              className="p-2 text-center border-2 rounded-full border-button-bg"
+              className="text-center border-b-2 border-button-bg mb-4 w-32 py-2"
+              placeholder="Guest #2000"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             ></input>
+          </div>
+          <div className="flex gap-4 h-12">
             <button
               className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
               onClick={(e) => {
-                socketContext.setUsername(username);
-                router.push("/room/testRoom");
+                setChoice("Join");
               }}
             >
-              Go!
+              Join a Room
             </button>
+            <div className="h-full border-l-2 border-gray-200"></div>
+            <button
+              className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
+              onClick={(e) => {
+                setChoice("Create");
+              }}
+            >
+              Create a Room
+            </button>
+            {/* <input
+              className="p-2 text-center border-2 rounded-full border-button-bg"
+              placeholder="Search for a room..."
+            /> */}
           </div>
+          {choice === "Join" && (
+            <div className="mt-6 flex items-center gap-4">
+              <input
+                className="p-2 text-center border-2 rounded-full border-button-bg"
+                placeholder="Search for a room..."
+              />
+              <button className="bg-green-300 rounded-full p-2">
+                <FontAwesomeIcon icon={faArrowRight} className="w-4" />
+              </button>
+            </div>
+          )}
+          {choice === "Create" && (
+            <div className="mt-6 flex items-center gap-4">
+              <input
+                className="p-2 text-center border-2 rounded-full border-button-bg w-full"
+                placeholder="Name of your room"
+              />
+              <button className="bg-green-300 rounded-full p-2">
+                <FontAwesomeIcon icon={faPlus} className="w-4" />
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <FontAwesomeIcon
