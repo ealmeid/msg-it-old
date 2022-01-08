@@ -74,7 +74,7 @@ const UsersConnectedList: React.FC<UserConnectedListProps> = ({ users }) => (
 
 const Room = () => {
   const router = useRouter();
-  const roomId = router.query.roomId as string;
+  const roomName = router.query.roomName as string;
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -83,7 +83,7 @@ const Room = () => {
 
   const getConnectedUsers = async () => {
     await axios
-      .get(`http://localhost:5000/users/${roomId}`)
+      .get(`http://localhost:5000/users/${roomName}`)
       .then((res: any) => {
         setUsersConnected(res.data);
       });
@@ -91,14 +91,15 @@ const Room = () => {
 
   useEffect(() => {
     getConnectedUsers();
-  }, [roomId]);
+  }, [roomName]);
 
   useEffect(() => {
     let newMessages = [...messages];
     if (socketContext.socket != null) {
-      socketContext.joinRoom(roomId);
+      socketContext.joinRoom(roomName);
 
-      socketContext.socket.on("message", (data: any) => {
+      socketContext.socket.on("receive_message", (data: any) => {
+        console.log("message received");
         newMessages.push(data);
         setMessages(newMessages);
       });
@@ -127,13 +128,13 @@ const Room = () => {
       <div className="flex justify-center items-center h-1/2-screen max-w-1/2-screen w-full">
         <div className="flex-1 h-full bg-white rounded-l-md flex flex-col border-r-2">
           <div className="flex justify-between p-4">
-            <div className="font-bold text-lg">Test Room</div>
+            <div className="font-bold text-lg">{roomName}</div>
             <FontAwesomeIcon
               icon={faSignOutAlt}
               className="cursor-pointer h-6"
               color="#6277f2"
               onClick={() => {
-                socketContext.socket.emit("leave_room", roomId);
+                socketContext.socket.emit("leave_room", roomName);
                 socketContext.socket.disconnect();
               }}
             />
@@ -162,7 +163,10 @@ const Room = () => {
               className="cursor-pointer w-8"
               color="#6277f2"
               onClick={() => {
-                socketContext.socket.send(message);
+                socketContext.socket.emit("send_message", {
+                  message: message,
+                  roomName: roomName,
+                });
                 setMessage("");
               }}
             />

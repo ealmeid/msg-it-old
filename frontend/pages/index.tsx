@@ -17,13 +17,19 @@ const Home: NextPage = () => {
   const [choice, setChoice] = useState<string>("");
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [username, setUsername] = useState<string>("");
-  const router = useRouter();
+  const [roomName, setRoomName] = useState<string>("");
   const socketContext = useContext(SocketContext) as ISocketContext;
+  const router = useRouter();
+
+  useEffect(() => {
+    let randomNum = Math.floor(Math.random() * 9999);
+    setUsername(`Guest#${randomNum}`);
+  }, []);
 
   useEffect(() => {
     let newSocket = io("ws://localhost:5000");
 
-    if (socketContext.socket == null) {
+    if (socketContext?.socket == null) {
       socketContext.setSocket(newSocket);
       newSocket.on("connect", () => {
         setIsConnected(true);
@@ -66,9 +72,9 @@ const Home: NextPage = () => {
           </div>
           <div className="flex gap-4 h-12">
             <button
-              className="bg-button-bg text-white text-lg p-2 px-4 rounded-full"
+              className="bg-button-bg text-white text-lg p-2 px-4 rounded-full opacity-50 cursor-not-allowed"
               onClick={(e) => {
-                setChoice("Join");
+                // setChoice("Join");
               }}
             >
               Join a Room
@@ -103,8 +109,16 @@ const Home: NextPage = () => {
               <input
                 className="p-2 text-center border-2 rounded-full border-button-bg w-full"
                 placeholder="Name of your room"
+                onChange={(e) => setRoomName(e.target.value)}
               />
-              <button className="bg-green-300 rounded-full p-2">
+              <button
+                className="bg-green-300 rounded-full p-2 hover:opacity-50 cursor-pointer"
+                onClick={() => {
+                  socketContext.socket.emit("set_name", username);
+                  socketContext.socket.emit("create_room", roomName);
+                  router.push(`/room/${roomName}`);
+                }}
+              >
                 <FontAwesomeIcon icon={faPlus} className="w-4" />
               </button>
             </div>

@@ -16,10 +16,11 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket: any) => {
-  socket.on("message", (data: any) => {
-    io.in("testRoom").emit("message", {
+  socket.on("send_message", (data: any) => {
+    const { roomName, message } = data;
+    io.in(roomName).emit("receive_message", {
       socketId: socket.id,
-      data: data,
+      data: message,
     });
   });
 
@@ -27,6 +28,9 @@ io.on("connection", (socket: any) => {
     socket.data["username"] = name;
   });
 
+  socket.on("create_room", (name: string) => {
+    socket.join(name);
+  });
   socket.on("join_room", (roomId: string) => {
     socket.join(roomId);
     io.in(roomId).emit("joined_room");
