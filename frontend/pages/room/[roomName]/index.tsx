@@ -41,18 +41,18 @@ const Message: React.FC<MessageProps> = ({
       } w-auto`}
       key={key}
     >
-      <div className="flex justify-between gap-2 px-4">
-        <div className="text-black font-semibold">
+      <div className="flex justify-between gap-2 px-2 items-center mb-1">
+        <div className="text-black dark:text-white font-semibold">
           {usersConnected
             ? usersConnected?.find((x) => x.socketId === message.socketId)
                 ?.username
             : "N/A"}
         </div>
-        <div className="text-gray-500">Thurs 23 2021</div>
+        <div className="text-gray-500 text-sm">Thurs 23 2021</div>
       </div>
 
       <div
-        className="mb-4 bg-button-bg text-white px-4 py-1 rounded-full max-w-sm w-48 break-all"
+        className="mb-4 bg-button-bg dark:bg-message-dark-bg text-white px-4 py-1 rounded-full max-w-sm w-48 break-all"
         key={message.data}
       >
         {message.data}
@@ -62,7 +62,7 @@ const Message: React.FC<MessageProps> = ({
 };
 
 const UsersConnectedList: React.FC<UserConnectedListProps> = ({ users }) => (
-  <div className="flex flex-col items-center justify-center bg-gray-100 h-full p-4 rounded-r-md">
+  <div className="flex flex-col items-center justify-center bg-gray-100 dark:bg-message-dark-bg h-full p-4 rounded-r-md">
     <div className="font-semibold">Users Connected</div>
     <div>
       {users.map((user) => {
@@ -95,6 +95,7 @@ const Room = () => {
 
   useEffect(() => {
     let newMessages = [...messages];
+
     if (socketContext.socket != null) {
       socketContext.joinRoom(roomName);
 
@@ -117,17 +118,17 @@ const Room = () => {
         getConnectedUsers();
       });
 
-      socketContext.socket.on("disconnect", (arg: any) => {
-        router.push("/");
-      });
+      // socketContext.socket.on("disconnect", (arg: any) => {
+      //   router.push("/");
+      // });
     }
   }, [socketContext]);
 
   return (
     <div className="flex items-center justify-center gap-4 min-h-screen max-h-screen bg-button-bg">
       <div className="flex justify-center items-center h-1/2-screen max-w-1/2-screen w-full">
-        <div className="flex-1 h-full bg-white rounded-l-md flex flex-col border-r-2">
-          <div className="flex justify-between p-4">
+        <div className="flex-1 h-full bg-white dark:bg-primary-dark-bg rounded-l-md flex flex-col border-r-2 dark:border-r-message-dark-bg">
+          <div className="flex justify-between p-6 items-center">
             <div className="font-bold text-lg">{roomName}</div>
             <FontAwesomeIcon
               icon={faSignOutAlt}
@@ -135,7 +136,8 @@ const Room = () => {
               color="#6277f2"
               onClick={() => {
                 socketContext.socket.emit("leave_room", roomName);
-                socketContext.socket.disconnect();
+                router.push("/");
+                // socketContext.socket.disconnect();
               }}
             />
           </div>
@@ -153,7 +155,7 @@ const Room = () => {
           </div>
           <div className="flex gap-2 items-center pb-6 px-6 pt-4">
             <input
-              className="w-full h-8 rounded-full px-4 py-6 border-2"
+              className="w-full border-none dark:bg-message-dark-bg h-8 rounded-full px-4 py-6"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Enter a message"
