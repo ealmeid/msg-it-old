@@ -6,6 +6,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        primary: "#6277f2",
+        "primary-light-bg": "white",
+        "primary-dark-bg": "#1c1f2a",
+        "message-dark-bg": "#2e3545",
         "button-bg": "#6277f2",
       },
       maxWidth: {
